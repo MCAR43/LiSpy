@@ -1,0 +1,40 @@
+server {
+        server_name www.studytime.live;
+
+        listen *:80;
+	listen [::]:80;
+        listen *:443 ssl;
+	listen [::]:443 ssl;
+
+        ssl_certificate /keys/studytime.pem;
+        ssl_certificate_key /keys/studytime.pub;
+
+        return 301 https://studytime.live$request_uri;
+}
+server {
+	server_name studytime.live;
+        listen *:80;
+        listen [::]:80;
+	return 301 https://studytime.live$request_uri;
+}
+server {
+        server_name studytime.live;
+
+        ssl_certificate /keys/studytime.pem;
+        ssl_certificate_key /keys/studytime.pub;
+
+        listen *:443 ssl;
+        listen [::]:443 ssl;
+
+        location / {
+                proxy_pass https://localhost:8080;
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection 'upgrade';
+                proxy_set_header Host $host;
+                proxy_cache_bypass $http_upgrade;
+                proxy_read_timeout 90;
+                proxy_redirect https://localhost:8080 https://studytime.live;
+        }
+}
+
